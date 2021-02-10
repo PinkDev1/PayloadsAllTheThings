@@ -29,6 +29,7 @@
   + [Tools](#tools-3)
     - [rip-hg.pl](#rip-hgpl)
 * [References](#references)
+* [Dependency Confusion](#dependency-confusion)
 
 ## Git
 
@@ -300,8 +301,28 @@ wget https://raw.githubusercontent.com/kost/dvcs-ripper/master/rip-hg.pl
 docker run --rm -it -v /path/to/host/work:/work:rw k0st/alpine-dvcs-ripper rip-hg.pl -v -u
 ```
 
+## Dependency Confusion
+
+Many organizations have their own dependency servers, where they host proprietary dependencies. On python projects, if during dependency updates, the `pip update` command uses the `--extra-index-url` parameter instead of `--index-url`, the project is vulnerable to dependency confusion. This flaw isn't exclusive to pip. This is how npm, pip, and Ruby update dependencies (in a nutshell):
+
+- Checks whether library exists on the specified (internal) package index
+- Checks whether library exists on the public package index (PyPI)
+- Installs whichever version is found. If the package exists on both, it defaults to installing from the source with the higher version number.
+- Therefore, uploading a package named library 9000.0.0 to PyPI would result in the dependency being hijacked
+
+For npm:
+```
+git clone https://github.com/JeppW/npm-dependency-confusion-poc
+
+# modify package.json and to set a domain or IP you control 
+cd npm-dependency-confusion-poc && nano package.json
+
+# Now publish the package.
+```
+
 ## References
 
 - [bl4de, hidden_directories_leaks](https://github.com/bl4de/research/tree/master/hidden_directories_leaks)
 - [bl4de, diggit](https://github.com/bl4de/security-tools/tree/master/diggit)
 - [Gitrob: Now in Go - Michael Henriksen](https://michenriksen.com/blog/gitrob-now-in-go/)
+- [Dependency Confusion: How I Hacked Into Apple, Microsoft and Dozens of Other Companies](https://medium.com/@alex.birsan/dependency-confusion-4a5d60fec610)
